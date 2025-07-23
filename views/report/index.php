@@ -2,30 +2,26 @@
 // report_interface.php
 // Interfaz para generar reporte de ventas filtrable y exportable a XML/JSON
 
+// 1) Incluye tu configuración general (que ya hace session_start() y define isAdmin(), isLoggedIn(), etc.)
+require_once __DIR__ . '/../../config/config.php';
+
+// Verificar que el usuario esté logueado
+if (!isLoggedIn()) {
+    redirect('../auth/login.php');
+}
+
+// Verificar que el usuario tenga permisos para acceder a reportes (Solo Admin y Consultor)
+if (!canAccessReports()) {
+    $_SESSION['error'] = 'No tienes permisos para acceder a los reportes';
+    redirect('../../index.php');
+}
+
 // Configuración de conexión a la base de datos
 $host = '127.0.0.1';
-$db   = 'ds6-2';
+$db   = 'ds7';
 $user = 'admin';
 $pass = '1234';
 $charset = 'utf8mb4';
-
-// 1) Incluye config para tener session, isLoggedIn() e isAdmin()
-require_once __DIR__ . '/../../config/config.php';
-
-// 2) Si no está logueado, le mandamos al login
-if (!isLoggedIn()) {
-    redirect('../../views/auth/login.php');
-    exit;
-}
-
-// 3) Y si no es admin, le denegamos el acceso (puedes redirigirlo o mostrar un mensaje)
-if (!isAdmin()) {
-    // O bien lo mandas a una página de “No autorizado”:
-    // redirect('../../views/errors/403.php');
-    // O de vuelta al login:
-    redirect('../../views/auth/login.php');
-    exit;
-}
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
 $options = [
@@ -273,6 +269,7 @@ if ($export === 'xml') {
     <?php else: ?>
       <div class="alert alert-secondary">No hay registros con esos filtros.</div>
     <?php endif; ?>
+
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
